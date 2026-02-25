@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Search View</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+  </head>
+  <body class="bg-body-tertiary">
+    <!-- NAV BAR -->
+    <nav class="navbar bg-dark">
+      <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1 fs-4 px-5 py-2 text-light"
+          >SearchView</span
+        >
+      </div>
+    </nav>
+    <!-- SECCIÓN DE FILTROS -->
+    <section class="px-5 py-3">
+      <div class="row w-100">
+        <!-- FILTROS -->
+        <div class="col-12 col-lg-4 mb-4 p-3">
+          <div class="bg-dark p-3 rounded-3">
+            <h4 class="text-light">Filtrar por:</h4>
+            <form>
+              <!-- PROFESIÓN -->
+              <div class="my-3">
+                <label class="form-label label-custom fw-bold">Profesión</label>
+                <input
+                  type="text"
+                  class="form-control bg-dark border-secondary text-light"
+                  placeholder="Ej: Ingeniero"
+                />
+              </div>
+              <!-- PAÍS -->
+              <div class="my-3">
+                <label class="form-label label-custom fw-bold">País</label>
+                <input
+                  type="text"
+                  class="form-control bg-dark border-secondary text-light"
+                  placeholder="Ej: El Salvador"
+                />
+              </div>
+              <!-- DEPARTAMENTO -->
+              <div class="my-3">
+                <label class="form-label label-custom fw-bold"
+                  >Departamento</label
+                >
+                <select class="form-select">
+                  <option selected disabled hidden>
+                    Seleccione un departamento:
+                  </option>
+                  <option>Santa Ana</option>
+                  <option>San Salvador</option>
+                  <option>Ahuachapán</option>
+                  <option>La Libertad</option>
+                </select>
+              </div>
+              <!-- CIUDAD -->
+              <div class="my-3">
+                <label class="form-label label-custom fw-bold">Ciudad</label>
+                <select class="form-select">
+                  <option selected disabled hidden>
+                    Seleccione una ciudad:
+                  </option>
+                  <option>San Salvador</option>
+                  <option>Santa Ana</option>
+                  <option>Chalchuapa</option>
+                  <option>Antiguo Cuscatlán</option>
+                </select>
+              </div>
+              <!-- BOTONES -->
+              <div class="my-3 d-grid gap-2">
+                <button class="btn btn-primary w-100 my-2">Filtrar</button>
+                <button class="btn btn-secondary w-100 my-2">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!-- RESULTADOS -->
+        <div class="col-12 col-lg-8 mb-4 p-3">
+          <!-- TÍTULO + CANTIDAD DE PERSONAS ENCONTRADAS -->
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+            <h4>Resultados encontrados</h4>
+            <span class="badge text-bg-secondary mt-2 mt-md-0">2 profesionales</span>
+          </div>
+          <!-- CARD 1 -->
+          <div class="card bg-dark my-3">
+            <div class="card-body">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start">
+                <div>
+                  <h5 class="card-title text-light my-1">Juan Pérez</h5>
+                  <p class="card-text my-2 fw-semibold">
+                    Desarrollador Fullstack
+                  </p>
+                  <p class="card-text text-secondary my-2">
+                    <i class="bi bi-geo-alt me-1"></i> El Salvador, Santa Ana,
+                    Santa Ana
+                  </p>
+                </div>
+                <button class="btn btn-primary mt-3 mt-md-0">Ver Perfil</button>
+              </div>
+              <hr>
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <h6 class="text-body-secondary">Fuente: Linkedin</h6>
+                <h6 class="text-body-secondary">15/02/2026</h6>
+              </div>
+            </div>
+          </div>
+          <!-- CARD 2 -->
+          <div class="card bg-dark my-3">
+            <div class="card-body">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start">
+                <div>
+                  <h5 class="card-title text-light my-1">Juan Pérez</h5>
+                  <p class="card-text my-2 fw-semibold">
+                    Desarrollador Fullstack
+                  </p>
+                  <p class="card-text text-secondary my-2">
+                    <i class="bi bi-geo-alt me-1"></i> El Salvador, Santa Ana,
+                    Santa Ana
+                  </p>
+                </div>
+                <button class="btn btn-primary mt-3 mt-md-0">Ver Perfil</button>
+              </div>
+              <hr>
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <h6 class="text-body-secondary">Fuente: Linkedin</h6>
+                <h6 class="text-body-secondary">15/02/2026</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
