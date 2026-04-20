@@ -1,5 +1,7 @@
 const apiURL = `http://localhost:3000/profesionales`;
 
+let currentResults = [];
+
 const filterForm = document.getElementById("filterForm");
 const resultsContainer = document.getElementById("resultsContainer");
 const totalProfessionals = document.getElementById("totalProfessionals");
@@ -7,12 +9,13 @@ const totalProfessionals = document.getElementById("totalProfessionals");
 const showResults = (dataProfessionals) => {
   const divResultsList = document.getElementById("resultsList");
   divResultsList.innerHTML = "";
+  currentResults = dataProfessionals;
   totalProfessionals.innerText = `${dataProfessionals.length} profesionales`;
 
   for (let professional of dataProfessionals) {
     console.log(professional);
     const fecha = professional.fecha_publicacion;
-    const fechaFormato = new Date(fecha).toLocaleDateString("es-Es");
+    const fechaFormato = new Date(fecha).toLocaleDateString("es-ES");
     divResultsList.insertAdjacentHTML(
       "beforeend",
       `
@@ -54,7 +57,6 @@ const populateSelects = (data) => {
   const selectDepartamento = document.getElementById("selectDepartamento");
   const selectCiudad = document.getElementById("selectCiudad");
 
-  // Obtener valores únicos
   const departamentos = [
     ...new Map(
       data.map((p) => [p.departamento.id_departamento, p.departamento]),
@@ -64,7 +66,6 @@ const populateSelects = (data) => {
     ...new Map(data.map((p) => [p.ciudad.id_ciudad, p.ciudad])).values(),
   ];
 
-  // Limpiar opciones anteriores (excepto el placeholder)
   selectDepartamento.innerHTML = `<option value="" selected disabled hidden>Seleccione un departamento:</option>`;
   selectCiudad.innerHTML = `<option value="" selected disabled hidden>Seleccione una ciudad:</option>`;
 
@@ -87,7 +88,7 @@ const getProfessionals = () => {
   fetch(apiURL)
     .then((reply) => reply.json())
     .then((data) => {
-      populateSelects(data); // 👈 poblar selects al cargar
+      populateSelects(data);
       showResults(data);
     });
 };
@@ -109,10 +110,10 @@ const allFilters = (filters) => {
 
         const matchDepartamento =
           filters.departamento === "" ||
-          p.departamento.nombre === filters.departamento; // 👈 string directo
+          p.departamento.nombre === filters.departamento;
 
         const matchCiudad =
-          filters.ciudad === "" || p.ciudad.nombre === filters.ciudad; // 👈 string directo
+          filters.ciudad === "" || p.ciudad.nombre === filters.ciudad;
 
         return matchProfesion && matchPais && matchDepartamento && matchCiudad;
       });
@@ -138,4 +139,64 @@ filterForm.addEventListener("reset", () => {
   document.getElementById("selectDepartamento").selectedIndex = 0;
   document.getElementById("selectCiudad").selectedIndex = 0;
   setTimeout(getProfessionals, 10);
+});
+
+// BOTONES DESCARGAR
+
+document.getElementById("btnDownloadJSON").addEventListener("click", () => {
+  if (currentResults.length === 0) return;
+  const blob = new Blob([JSON.stringify(currentResults, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "profesionales.json";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("btnDownloadCSV").addEventListener("click", () => {
+  if (currentResults.length === 0) return;
+
+  const headers = [
+    "nombre",
+    "apellido",
+    "profesion",
+    "pais",
+    "departamento",
+    "ciudad",
+    "fuente",
+    "perfil_url",
+    "email",
+    "telefono",
+    "fecha_publicacion",
+  ];
+  const rows = currentResults.map((p) => [
+    p.nombre,
+    p.apellido,
+    p.profesion,
+    p.pais,
+    p.departamento.nombre,
+    p.ciudad.nombre,
+    p.fuente.nombre,
+    p.perfil_url,
+    p.email,
+    p.telefono,
+    new Date(p.fecha_publicacion).toLocaleDateString("es-ES"),
+  ]);
+
+  const csvContent = [headers, ...rows]
+    .map((row) =>
+      row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","),
+    )
+    .join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "profesionales.csv";
+  a.click();
+  URL.revokeObjectURL(url);
 });
