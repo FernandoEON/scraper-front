@@ -44,9 +44,11 @@
 
           <form id="filterForm">
             <div class="my-3">
-              <label for="profesionInput" class="form-label fw-bold">Profesión</label>
-              <input id="profesionInput" type="text" class="form-control bg-dark border-secondary text-light"
-                placeholder="Ej: Pediatrician" />
+              <label for="profesionInput" class="form-label fw-bold">Profesión / Empleo</label>
+              <input id="profesionInput" type="text" list="empleosList"
+                class="form-control bg-dark border-secondary text-light" placeholder="Ej: Pediatrician"
+                autocomplete="off" />
+              <datalist id="empleosList"></datalist>
             </div>
 
             <div class="my-3">
@@ -138,8 +140,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script src="../js/searchView.api.js?v=20260515-3"></script>
-  <script src="../js/searchView.js?v=20260515-3"></script>
+  <script src="../js/searchView.api.js?v=20260515-5"></script>
+  <script src="../js/searchView.js?v=20260515-5"></script>
 </body>
 
 </html>

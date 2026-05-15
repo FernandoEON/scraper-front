@@ -2,6 +2,7 @@ const API_URL = "http://localhost:3000/profesionales";
 const SCRAPER_URL = "http://localhost:3000/hospitaljobs/scrape-doctors";
 const CIUDADES_URL = "http://localhost:3000/ciudades";
 const DEPARTAMENTOS_URL = "http://localhost:3000/departamentos";
+const EMPLEOS_URL = "http://localhost:3000/empleos";
 const LOGIN_URL = "Login.html";
 const AUTH_KEYS = [
   "access_token",
@@ -90,6 +91,10 @@ async function fetchCiudades() {
 
 async function fetchDepartamentos() {
   return fetchJsonWithAuth(DEPARTAMENTOS_URL);
+}
+
+async function fetchEmpleos() {
+  return fetchJsonWithAuth(EMPLEOS_URL);
 }
 
 async function fetchScraper(page = 1) {

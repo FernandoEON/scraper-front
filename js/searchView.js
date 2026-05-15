@@ -5,6 +5,7 @@ const autoSaveDbBtn = document.getElementById("autoSaveDbBtn");
 
 let selectedCiudadId = null;
 let selectedDepartamentoId = null;
+let selectedEmpleoId = null;
 
 let currentPage = 1;
 let totalPages = 1;
@@ -14,14 +15,17 @@ let profesionalesFiltrados = [];
 
 let ciudadesCache = [];
 let departamentosCache = [];
+let empleosCache = [];
 
 const paginationContainer = document.getElementById("paginationContainer");
 
 const profesionInput = document.getElementById("profesionInput");
+const empleoInput = profesionInput;
 const ciudadInput = document.getElementById("ciudadInput");
 const departamentoInput = document.getElementById("departamentoInput");
 const ciudadesList = document.getElementById("ciudadesList");
 const departamentosList = document.getElementById("departamentosList");
+const empleosList = document.getElementById("empleosList");
 
 const scrapeBtn = document.getElementById("scrapeBtn");
 const savedDbBtn = document.getElementById("savedDbBtn");
@@ -65,6 +69,7 @@ function buildSavePayload(data) {
     id_departamento: selectedDepartamentoId,
     id_ciudad: selectedCiudadId,
     id_fuente: 5,
+    id_empleo: selectedEmpleoId ?? undefined,
 
     email: p.email === "No encontrado" ? null : p.email,
     telefono: p.telefono ?? null,
@@ -92,8 +97,27 @@ function normalizeListResponse(response) {
   if (Array.isArray(response?.items)) return response.items;
   if (Array.isArray(response?.ciudades)) return response.ciudades;
   if (Array.isArray(response?.departamentos)) return response.departamentos;
+  if (Array.isArray(response?.empleos)) return response.empleos;
 
   return [];
+}
+
+function getEmpleoId(empleo) {
+  return empleo?.id_empleo ?? empleo?.id ?? empleo?.idEmpleo ?? null;
+}
+
+function getEmpleoName(empleo) {
+  return empleo?.nombre ?? empleo?.empleo ?? empleo?.titulo ?? empleo?.name ?? "";
+}
+
+function syncSelectedEmpleo() {
+  const empleoNombre = empleoInput.value.trim().toLowerCase();
+
+  const empleo = empleosCache.find(
+    (e) => getEmpleoName(e).toLowerCase() === empleoNombre
+  );
+
+  selectedEmpleoId = empleo ? getEmpleoId(empleo) : null;
 }
 
 function mapDoctorToProfesional(doctor, index) {
@@ -371,17 +395,21 @@ async function loadFilterOptions() {
   try {
     ciudadesList.innerHTML = "";
     departamentosList.innerHTML = "";
+    empleosList.innerHTML = "";
 
-    const [ciudadesResponse, departamentosResponse] = await Promise.all([
+    const [ciudadesResponse, departamentosResponse, empleosResponse] = await Promise.all([
       fetchCiudades(),
       fetchDepartamentos(),
+      fetchEmpleos(),
     ]);
 
     const ciudades = normalizeListResponse(ciudadesResponse);
     const departamentos = normalizeListResponse(departamentosResponse);
+    const empleos = normalizeListResponse(empleosResponse);
 
     ciudadesCache = ciudades;
     departamentosCache = departamentos;
+    empleosCache = empleos;
 
     ciudades.forEach((c) => {
       if (!c?.nombre) return;
@@ -399,15 +427,24 @@ async function loadFilterOptions() {
       departamentosList.appendChild(option);
     });
 
-    if (!ciudades.length || !departamentos.length) {
-      showError("No se encontraron ciudades o estados para mostrar.");
+    empleos.forEach((e) => {
+      const empleoName = getEmpleoName(e);
+      if (!empleoName) return;
+
+      const option = document.createElement("option");
+      option.value = empleoName;
+      empleosList.appendChild(option);
+    });
+
+    if (!ciudades.length || !departamentos.length || !empleos.length) {
+      showError("No se encontraron ciudades, estados o empleos para mostrar.");
       return;
     }
 
     showError();
   } catch (error) {
     console.error("Error cargando opciones:", error);
-    showError("No se pudieron cargar las ciudades y estados. Verifica sesión y backend.");
+    showError("No se pudieron cargar las ciudades, estados y empleos. Verifica sesión y backend.");
   }
 }
 
@@ -432,14 +469,24 @@ ciudadInput.addEventListener("change", () => {
   }
 });
 
+empleoInput.addEventListener("change", () => {
+  syncSelectedEmpleo();
+});
+
 async function handleSaveToDb() {
   try {
+    syncSelectedEmpleo();
+
     if (!profesionalesFiltrados.length) {
       return alert("No hay profesionales para guardar.");
     }
 
     if (!selectedCiudadId || !selectedDepartamentoId) {
       return alert("Selecciona una ciudad válida de la lista antes de guardar.");
+    }
+
+    if (empleoInput.value.trim() && !selectedEmpleoId) {
+      return alert("Selecciona un empleo válido de la lista antes de guardar.");
     }
 
     const payload = buildSavePayload(profesionalesFiltrados);
@@ -457,12 +504,18 @@ async function handleSaveToDb() {
 }
 
 async function handleAutoSavePagesToDb() {
+  syncSelectedEmpleo();
+
   const MAX_AUTO_PAGES = 5;
   const startPage = currentPage || 1;
   const targetPage = startPage + MAX_AUTO_PAGES;
 
   if (!selectedCiudadId || !selectedDepartamentoId) {
     return alert("Selecciona una ciudad válida de la lista antes de auto guardar.");
+  }
+
+  if (empleoInput.value.trim() && !selectedEmpleoId) {
+    return alert("Selecciona un empleo válido de la lista antes de auto guardar.");
   }
 
   const confirmSave = confirm(

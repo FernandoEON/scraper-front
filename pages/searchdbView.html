@@ -43,9 +43,11 @@
 
           <form id="filterForm">
             <div class="my-3">
-              <label for="profesionInput" class="form-label fw-bold">Profesión</label>
-              <input id="profesionInput" type="text" class="form-control bg-dark border-secondary text-light"
-                placeholder="Ej: Ingeniero" />
+              <label for="profesionInput" class="form-label fw-bold">Profesión / Empleo</label>
+              <input id="profesionInput" type="text" list="empleosList"
+                class="form-control bg-dark border-secondary text-light" placeholder="Ej: Ingeniero"
+                autocomplete="off" />
+              <datalist id="empleosList"></datalist>
             </div>
 
             <div class="my-3">
@@ -71,6 +73,12 @@
                 class="form-control bg-dark border-secondary text-light" placeholder="Ej: California"
                 autocomplete="off" />
               <datalist id="departamentosList"></datalist>
+            </div>
+
+            <div class="my-3">
+              <label for="limitInput" class="form-label fw-bold">Resultados por página</label>
+              <input id="limitInput" type="number" min="30" max="10000" step="10"
+                class="form-control bg-dark border-secondary text-light" value="30" />
             </div>
 
             <div class="my-3 d-grid gap-2">
@@ -112,7 +120,7 @@
 
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../js/SearchDbView.js"></script>
+  <script src="../js/SearchDbView.js?v=20260515-4"></script>
 </body>
 
 </html>
