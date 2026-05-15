@@ -48,13 +48,15 @@
                     <small id="error-msg" class="error-text">Las contraseñas no coinciden</small>
                 </div>
 
+                <small id="error-server" class="error-text" style="display:none; margin-bottom: 1rem;">Ocurrió un error al crear la cuenta.</small>
+
                 <button type="submit" class="btn-submit">
                     Registrarse
                 </button>
             </form>
             
             <div class="links">
-                <a href="#">Ya tengo cuenta, iniciar sesión</a>
+                <a href="Login.html">Ya tengo cuenta, iniciar sesión</a>
             </div>
         </div>
 
@@ -76,11 +78,14 @@
         const passwordInput = document.getElementById('password');
         const confirmInput = document.getElementById('confirm');
         const errorMsg = document.getElementById('error-msg');
+        const errorServer = document.getElementById('error-server');
         const barraFuerza = document.getElementById('barra-fuerza');
         const textoFuerza = document.getElementById('texto-fuerza');
         const formulario = document.getElementById('miFormulario');
         const contenedorForm = document.getElementById('formulario-container');
         const mensajeExito = document.getElementById('mensaje-exito');
+
+        const API_URL = 'http://localhost:3000/auth/register';
 
         passwordInput.addEventListener('input', function() {
             const val = passwordInput.value;
@@ -114,9 +119,12 @@
             }
         });
 
-        formulario.addEventListener('submit', function(e) {
+        formulario.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+            errorMsg.style.display = 'none';
+            errorServer.style.display = 'none';
+            errorServer.textContent = '';
+
             if (passwordInput.value !== confirmInput.value) {
                 errorMsg.style.display = 'block';
                 confirmInput.classList.add('input-error');
@@ -124,12 +132,43 @@
             }
 
             const btn = document.querySelector('.btn-submit');
-            btn.textContent = "Procesando...";
-            
-            setTimeout(() => {
+            btn.disabled = true;
+            const originalBtnText = btn.textContent;
+            btn.textContent = 'Procesando...';
+
+            const payload = {
+                nombre: document.getElementById('nombre').value.trim(),
+                apellido: document.getElementById('apellido').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                password: passwordInput.value,
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    errorServer.textContent = errorData?.message || 'No se pudo crear la cuenta. Intenta nuevamente.';
+                    errorServer.style.display = 'block';
+                    return;
+                }
+
                 contenedorForm.style.display = 'none';
                 mensajeExito.style.display = 'block';
-            }, 1000);
+            } catch (error) {
+                console.error('Error al registrar usuario:', error);
+                errorServer.textContent = 'No se pudo conectar con el servidor. Verifica que el backend esté en ejecución.';
+                errorServer.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalBtnText;
+            }
         });
     </script>
 </body>

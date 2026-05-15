@@ -57,10 +57,11 @@
                 class="btn btn-info text-white w-100 mt-4 fw-semibold shadow-sm">
                 Login
             </button>
+            <div id="login-error" class="text-danger text-center mt-2" style="display:none; font-size:0.95rem;"></div>
         </form>
         <div class="d-flex gap-1 justify-content-center mt-3">
             <div>¿No tienes una cuenta?</div>
-            <a href="#" class="text-decoration-none text-info fw-semibold">
+            <a href="Registerview.html" class="text-decoration-none text-info fw-semibold">
                 Regístrate
             </a>
         </div>
@@ -69,10 +70,75 @@
                 <span class="bg-white px-3">or</span>
             </div>
         </div>
-        <div class="btn d-flex gap-2 justify-content-center border shadow-sm">
+        <!-- <div class="btn d-flex gap-2 justify-content-center border shadow-sm">
             <img src="/assets/img/google-icon.svg" alt="google-icon" style="height: 1.6rem;">
             <div class="fw-semibold text-secondary">Continuar con Google</div>
-        </div>
+        </div> -->
     </div>
+
+    <script>
+        const form = document.querySelector('form');
+        const loginError = document.getElementById('login-error');
+        const apiUrl = 'http://localhost:3000/auth/login';
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            loginError.style.display = 'none';
+            loginError.textContent = '';
+
+            const formData = new FormData(form);
+            const email = formData.get('email')?.toString().trim();
+            const password = formData.get('password')?.toString();
+
+            if (!email || !password) {
+                loginError.textContent = 'Completa todos los campos antes de continuar.';
+                loginError.style.display = 'block';
+                return;
+            }
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Ingresando...';
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json().catch(() => null);
+
+                if (!response.ok) {
+                    loginError.textContent = data?.message || 'Credenciales inválidas o error de servidor.';
+                    loginError.style.display = 'block';
+                    return;
+                }
+
+                const token = data?.access_token || data?.accessToken || data?.token || data?.jwt || data?.jwt_token || data?.auth_token;
+                if (token) {
+                    localStorage.setItem('access_token', token);
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('auth_token', token);
+                    localStorage.setItem('jwt', token);
+                    window.location.href = 'searchView.html';
+                } else {
+                    console.log('Login response without token:', data);
+                    loginError.textContent = data?.message || 'No se recibió token de acceso. Intenta de nuevo.';
+                    loginError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                loginError.textContent = 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.';
+                loginError.style.display = 'block';
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
+            }
+        });
+    </script>
 </body>
 </html>
