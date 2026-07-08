@@ -116,6 +116,8 @@ async function fetchScraper(page = 1) {
 }
 
 async function saveProfesionales(profesionales) {
+  console.log("PROFESIONALES A GUARDAR:", profesionales);
+
   return fetchJsonWithAuth(`${API_URL}/bulk`, {
     method: "POST",
     body: JSON.stringify(profesionales),
