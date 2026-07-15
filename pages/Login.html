@@ -124,7 +124,7 @@
                     localStorage.setItem('token', token);
                     localStorage.setItem('auth_token', token);
                     localStorage.setItem('jwt', token);
-                    window.location.href = 'searchView.html';
+                    window.location.href = 'searchdbView.html';
                 } else {
                     console.log('Login response without token:', data);
                     loginError.textContent = data?.message || 'No se recibió token de acceso. Intenta de nuevo.';

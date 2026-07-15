@@ -2,6 +2,7 @@ const API_URL = "http://localhost:3000/profesionales";
 const SCRAPER_URL = "http://localhost:3000/hospitaljobs/scrape-doctors";
 const CIUDADES_URL = "http://localhost:3000/ciudades";
 const DEPARTAMENTOS_URL = "http://localhost:3000/departamentos";
+const PAISES_URL = "http://localhost:3000/paises";
 const EMPLEOS_URL = "http://localhost:3000/empleos";
 const LOGIN_URL = "Login.html";
 const AUTH_KEYS = [
@@ -89,8 +90,26 @@ async function fetchCiudades() {
   return fetchJsonWithAuth(CIUDADES_URL);
 }
 
-async function fetchDepartamentos() {
-  return fetchJsonWithAuth(DEPARTAMENTOS_URL);
+async function fetchCiudadesByDepartamento(idDepartamento) {
+  const url = new URL(CIUDADES_URL);
+  if (idDepartamento) {
+    url.searchParams.set("id_departamento", String(idDepartamento));
+  }
+
+  return fetchJsonWithAuth(url.toString());
+}
+
+async function fetchDepartamentos(idPais) {
+  const url = new URL(DEPARTAMENTOS_URL);
+  if (idPais) {
+    url.searchParams.set("id_pais", String(idPais));
+  }
+
+  return fetchJsonWithAuth(url.toString());
+}
+
+async function fetchPaises() {
+  return fetchJsonWithAuth(PAISES_URL);
 }
 
 async function fetchEmpleos() {

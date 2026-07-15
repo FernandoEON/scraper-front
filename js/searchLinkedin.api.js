@@ -1,37 +1,72 @@
-const LINKEDIN_SEARCH_URL = "http://localhost:3000/scraper/linkedin/people";
+const LINKEDIN_PEOPLE_SEARCH_URL =
+  'https://www.linkedin.com/search/results/people/';
 
-async function searchLinkedinPeople(params) {
-  const query = new URLSearchParams({
-    profession: params.profession || "",
-    country: params.country || "",
-    pageStart: String(params.pageStart ?? 1),
-    pageEnd: String(params.pageEnd ?? 1),
-    downloadPdf: String(params.downloadPdf ?? false),
-  }).toString();
+const LINKEDIN_GEO_URNS = {
+  'el salvador': '106522560',
+  guatemala: '100877388',
+};
 
-  const url = `${LINKEDIN_SEARCH_URL}?${query}`;
+function buildLinkedinPeopleSearchUrl({
+  profession,
+  country,
+  page = 1,
+}) {
+  const normalizedProfession =
+    String(profession || '').trim();
 
-  if (typeof fetchJsonWithAuth === "function") {
-    return fetchJsonWithAuth(url, { method: "GET" });
+  const normalizedCountry =
+    String(country || '')
+      .trim()
+      .toLowerCase();
+
+  const normalizedPage =
+    Number(page) > 0
+      ? Number(page)
+      : 1;
+
+  const url = new URL(
+    LINKEDIN_PEOPLE_SEARCH_URL,
+  );
+
+  url.searchParams.set(
+    'keywords',
+    normalizedProfession,
+  );
+
+  url.searchParams.set(
+    'origin',
+    'FACETED_SEARCH',
+  );
+
+  const geoUrn =
+    LINKEDIN_GEO_URNS[normalizedCountry];
+
+  if (geoUrn) {
+    url.searchParams.set(
+      'geoUrn',
+      `["${geoUrn}"]`,
+    );
   }
 
-  const response = await fetch(url, { method: "GET" });
-  const text = await response.text();
-
-  if (!text) {
-    return null;
+  if (normalizedPage > 1) {
+    url.searchParams.set(
+      'page',
+      String(normalizedPage),
+    );
   }
 
-  try {
-    const data = JSON.parse(text);
-    if (!response.ok) {
-      throw new Error(data?.message || `Error HTTP: ${response.status}`);
-    }
-    return data;
-  } catch {
-    if (!response.ok) {
-      throw new Error(text || `Error HTTP: ${response.status}`);
-    }
-    return text;
-  }
+  return url.toString();
+}
+
+function openLinkedinPeopleSearch(params) {
+  const url =
+    buildLinkedinPeopleSearchUrl(params);
+
+  window.open(
+    url,
+    '_blank',
+    'noopener,noreferrer',
+  );
+
+  return url;
 }

@@ -9,38 +9,40 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+  <style>
+    .top-nav {
+      background: #111827;
+      border-bottom: 1px solid #2a2f3a;
+    }
+    .brand {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      margin-right: 14px;
+    }
+    .nav-link-btn { white-space: nowrap; }
+  </style>
 </head>
 
 <body class="bg-body-tertiary">
-  <nav class="navbar bg-dark">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-
-      <div class="d-flex align-items-center gap-3">
-        <span class="navbar-brand mb-0 h1 fs-4 px-2 py-2 text-light">
-          SearchView
-        </span>
-
-        <a href="SearchView.html" class="btn btn-outline-info">
-          Scraper
-        </a>
-
-        <a href="SearchDbView.html" class="btn btn-outline-warning">
-          Base de datos
-        </a>
-
-        <a href="searchlinkedinhtml.html" class="btn btn-outline-light">
-          LinkedIn
-        </a>
-      </div>
-
-      <button id="logoutBtn" class="btn btn-outline-light me-3">
-        Logout
+  <nav class="navbar navbar-expand-lg navbar-dark top-nav">
+    <div class="container-fluid px-3 px-lg-4">
+      <span class="brand">Scraper Console</span>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavMenu">
+        <span class="navbar-toggler-icon"></span>
       </button>
-
+      <div class="collapse navbar-collapse" id="topNavMenu">
+        <div class="d-flex flex-column flex-lg-row gap-2">
+          <a href="searchdbView.html" class="btn btn-outline-warning nav-link-btn">Base de Datos</a>
+          <a href="searchView.html" class="btn btn-info nav-link-btn">Scraper YP</a>
+          <a href="searchlinkedin.html" class="btn btn-outline-light nav-link-btn">LinkedIn Personas</a>
+          <a href="searchlinkedinjobs.html" class="btn btn-outline-success nav-link-btn">LinkedIn Ofertas</a>
+        </div>
+        <button id="logoutBtn" class="btn btn-outline-light ms-lg-auto mt-2 mt-lg-0">Logout</button>
+      </div>
     </div>
   </nav>
-
-  <section class="px-5 py-3">
+  <section class="px-4 px-lg-5 py-3">
     <div class="row w-100">
       <div class="col-12 col-lg-4 mb-4 p-3">
         <div class="bg-dark p-3 rounded-3">
@@ -56,24 +58,23 @@
             </div>
 
             <div class="my-3">
-              <label for="ciudadInput" class="form-label fw-bold">Ciudad</label>
-              <input id="ciudadInput" type="text" list="ciudadesList"
-                class="form-control bg-dark border-secondary text-light" placeholder="Ej: Echo Park"
-                autocomplete="off" />
-              <datalist id="ciudadesList"></datalist>
+              <label for="paisSelect" class="form-label fw-bold">Pais</label>
+              <select id="paisSelect" class="form-select bg-dark text-light border-secondary">
+                <option value="">Selecciona país</option>
+              </select>
             </div>
 
             <div class="my-3">
               <label for="departamentoInput" class="form-label fw-bold">Estado</label>
-              <input id="departamentoInput" type="text" list="departamentosList"
-                class="form-control bg-dark border-secondary text-light" placeholder="Ej: CA" autocomplete="off" />
-              <datalist id="departamentosList"></datalist>
+              <select id="departamentoInput" class="form-select bg-dark border-secondary text-light">
+                <option value="">Selecciona estado/departamento</option>
+              </select>
             </div>
 
             <div class="my-3">
-              <label for="paisSelect" class="form-label fw-bold">Pais</label>
-              <select id="paisSelect" class="form-select bg-dark text-light border-secondary" disabled>
-                <option selected>Estados Unidos</option>
+              <label for="ciudadInput" class="form-label fw-bold">Ciudad</label>
+              <select id="ciudadInput" class="form-select bg-dark border-secondary text-light">
+                <option value="">Selecciona ciudad</option>
               </select>
             </div>
 

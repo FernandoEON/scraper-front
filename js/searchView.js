@@ -5,6 +5,7 @@ const autoSaveDbBtn = document.getElementById("autoSaveDbBtn");
 
 let selectedCiudadId = null;
 let selectedDepartamentoId = null;
+let selectedPaisId = null;
 let selectedEmpleoId = null;
 
 let currentPage = 1;
@@ -15,16 +16,16 @@ let profesionalesFiltrados = [];
 
 let ciudadesCache = [];
 let departamentosCache = [];
+let paisesCache = [];
 let empleosCache = [];
 
 const paginationContainer = document.getElementById("paginationContainer");
 
 const profesionInput = document.getElementById("profesionInput");
 const empleoInput = profesionInput;
+const paisSelect = document.getElementById("paisSelect");
 const ciudadInput = document.getElementById("ciudadInput");
 const departamentoInput = document.getElementById("departamentoInput");
-const ciudadesList = document.getElementById("ciudadesList");
-const departamentosList = document.getElementById("departamentosList");
 const empleosList = document.getElementById("empleosList");
 
 const scrapeBtn = document.getElementById("scrapeBtn");
@@ -64,7 +65,7 @@ function buildSavePayload(data) {
     nombre: p.nombre ?? "",
     apellido: p.apellido ?? "",
     profesion: p.profesion ?? "",
-    pais: p.pais ?? "Estados Unidos",
+    pais: paisSelect.value || p.pais || "Estados Unidos",
 
     id_departamento: selectedDepartamentoId,
     id_ciudad: selectedCiudadId,
@@ -128,7 +129,7 @@ function mapDoctorToProfesional(doctor, index) {
     nombre: doctor.name ?? "Sin nombre",
     apellido: "",
     profesion: doctor.profession ?? "No encontrado",
-    pais: "Estados Unidos",
+    pais: paisSelect.value || "Estados Unidos",
     departamento: { nombre: doctor.state ?? "No encontrado" },
     ciudad: { nombre: doctor.city ?? "No encontrado" },
     fuente: { nombre: "Páginas Amarillas" },
@@ -393,38 +394,41 @@ function handleLogout() {
 
 async function loadFilterOptions() {
   try {
-    ciudadesList.innerHTML = "";
-    departamentosList.innerHTML = "";
     empleosList.innerHTML = "";
+    paisSelect.innerHTML = `<option value="">Selecciona país</option>`;
+    departamentoInput.innerHTML = `<option value="">Selecciona estado/departamento</option>`;
+    ciudadInput.innerHTML = `<option value="">Selecciona ciudad</option>`;
 
-    const [ciudadesResponse, departamentosResponse, empleosResponse] = await Promise.all([
+    const [paisesResponse, ciudadesResponse, departamentosResponse, empleosResponse] = await Promise.all([
+      fetchPaises(),
       fetchCiudades(),
       fetchDepartamentos(),
       fetchEmpleos(),
     ]);
 
+    const paises = normalizeListResponse(paisesResponse);
     const ciudades = normalizeListResponse(ciudadesResponse);
     const departamentos = normalizeListResponse(departamentosResponse);
     const empleos = normalizeListResponse(empleosResponse);
 
+    paisesCache = paises;
     ciudadesCache = ciudades;
     departamentosCache = departamentos;
     empleosCache = empleos;
 
-    ciudades.forEach((c) => {
-      if (!c?.nombre) return;
-
+    const fallbackCountries = ["Estados Unidos", "El Salvador", "Guatemala"];
+    const existingCountryNames = new Set();
+    [...paisesCache, ...fallbackCountries.map((nombre) => ({ nombre }))].forEach((p) => {
+      const nombre = p?.nombre?.trim();
+      if (!nombre || existingCountryNames.has(nombre.toLowerCase())) return;
+      existingCountryNames.add(nombre.toLowerCase());
       const option = document.createElement("option");
-      option.value = c.nombre;
-      ciudadesList.appendChild(option);
-    });
-
-    departamentos.forEach((d) => {
-      if (!d?.nombre) return;
-
-      const option = document.createElement("option");
-      option.value = d.nombre;
-      departamentosList.appendChild(option);
+      option.value = nombre;
+      option.textContent = nombre;
+      if (p?.id_pais) {
+        option.dataset.id = String(p.id_pais);
+      }
+      paisSelect.appendChild(option);
     });
 
     empleos.forEach((e) => {
@@ -436,10 +440,8 @@ async function loadFilterOptions() {
       empleosList.appendChild(option);
     });
 
-    if (!ciudades.length || !departamentos.length || !empleos.length) {
-      showError("No se encontraron ciudades, estados o empleos para mostrar.");
-      return;
-    }
+    syncSelectedCountry();
+    populateDepartamentosByPais();
 
     showError();
   } catch (error) {
@@ -448,25 +450,82 @@ async function loadFilterOptions() {
   }
 }
 
-ciudadInput.addEventListener("change", () => {
-  const ciudadNombre = ciudadInput.value.trim().toLowerCase();
+function getDepartamentoPaisName(departamento) {
+  return (
+    departamento?.pais?.nombre ||
+    departamento?.pais_nombre ||
+    null
+  );
+}
 
-  const ciudad = ciudadesCache.find(
-    (c) => c.nombre.toLowerCase() === ciudadNombre
+function populateDepartamentosByPais() {
+  const selectedCountry = paisSelect.value.trim().toLowerCase();
+  departamentoInput.innerHTML = `<option value="">Selecciona estado/departamento</option>`;
+  ciudadInput.innerHTML = `<option value="">Selecciona ciudad</option>`;
+
+  const filtered = departamentosCache.filter((d) => {
+    if (!selectedCountry) return true;
+    const countryName = getDepartamentoPaisName(d)?.trim().toLowerCase();
+    return countryName && countryName === selectedCountry;
+  });
+
+  filtered.forEach((d) => {
+    if (!d?.nombre) return;
+    const option = document.createElement("option");
+    option.value = d.nombre;
+    option.textContent = d.nombre;
+    option.dataset.id = String(d.id_departamento);
+    departamentoInput.appendChild(option);
+  });
+
+  selectedDepartamentoId = null;
+  selectedCiudadId = null;
+}
+
+function populateCiudadesByDepartamento() {
+  const selectedDepartamentoName = departamentoInput.value.trim().toLowerCase();
+  const selectedDepartamento = departamentosCache.find(
+    (d) => d?.nombre?.trim().toLowerCase() === selectedDepartamentoName,
   );
 
-  if (!ciudad) {
-    selectedCiudadId = null;
-    selectedDepartamentoId = null;
-    return;
-  }
+  selectedDepartamentoId = selectedDepartamento?.id_departamento ?? null;
+  ciudadInput.innerHTML = `<option value="">Selecciona ciudad</option>`;
 
-  selectedCiudadId = ciudad.id_ciudad;
+  const filteredCities = ciudadesCache.filter((c) => {
+    if (!selectedDepartamentoId) return false;
+    return c?.id_departamento === selectedDepartamentoId;
+  });
 
-  if (ciudad.departamento) {
-    departamentoInput.value = ciudad.departamento.nombre;
-    selectedDepartamentoId = ciudad.departamento.id_departamento;
-  }
+  filteredCities.forEach((c) => {
+    if (!c?.nombre) return;
+    const option = document.createElement("option");
+    option.value = c.nombre;
+    option.textContent = c.nombre;
+    option.dataset.id = String(c.id_ciudad);
+    ciudadInput.appendChild(option);
+  });
+
+  selectedCiudadId = null;
+}
+
+function syncSelectedCountry() {
+  const selectedOption = paisSelect.options[paisSelect.selectedIndex];
+  selectedPaisId = selectedOption?.dataset?.id ? Number(selectedOption.dataset.id) : null;
+}
+
+paisSelect.addEventListener("change", () => {
+  syncSelectedCountry();
+  populateDepartamentosByPais();
+});
+
+departamentoInput.addEventListener("change", () => {
+  populateCiudadesByDepartamento();
+});
+
+ciudadInput.addEventListener("change", () => {
+  const ciudadNombre = ciudadInput.value.trim().toLowerCase();
+  const ciudad = ciudadesCache.find((c) => c?.nombre?.trim().toLowerCase() === ciudadNombre);
+  selectedCiudadId = ciudad?.id_ciudad ?? null;
 });
 
 empleoInput.addEventListener("change", () => {
